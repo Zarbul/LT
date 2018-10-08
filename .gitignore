@@ -26,6 +26,7 @@ wheels/
 .installed.cfg
 *.egg
 .idea/
+share/
 *.mp4
 pip-selfcheck.json
 pyvenv.cfg
