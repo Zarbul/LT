@@ -15,25 +15,28 @@ def home(request):
     list_period = Period.objects.all
     form = LTForm(request.GET)
     if request.GET:
-        filial = request.GET['filial']
-        locomotive = request.GET['locomotive']
-        period = int(request.GET['period'])
-        print(filial, locomotive, period, 'periodssss', type(period))
+        filial = int(request.GET['filial'])
+        locomotive = int(request.GET['locomotive'])
+        year = int(request.GET['period'])
+        print(filial, locomotive, year, 'periodssss', type(year))
         # if filial in list_branch:
         #     print('ok')
     else:
         filial = 0
         locomotive = 0
-        year = [i for i in range(2017, 2022)]
-        period = ""
-        for i in year:
-            period = period + str(i) + "," + " "
+        years = [i for i in range(2017, 2022)]
+        year = ""
+        for i in years:
+            year = year + str(i) + "," + " "
+        print(year, filial, locomotive,  'periodssss', type(year))
 
     content = {
         'branches': list_branch,
         'locomotives': list_locomotive,
+        'train': locomotive,
+        'filial': filial,
         'periods': list_period,
-        'chart_period': period,
+        'chart_period': year,
         'form': form,
         'username': auth.get_user(request).username,
     }

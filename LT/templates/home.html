@@ -1,5 +1,7 @@
 {% extends 'adminlte/base.html' %}
 
+{% load mathfilters %}
+
 {% load static %}
 
 {% block title %}My App{% endblock %}
@@ -9,14 +11,17 @@
      <form>
 
         <select id="filial" name="filial">
+            <option selected value="0">----------------</option>
             {% for i in branches %}
                 <option value="{{ i.id }}">{{ i }}</option>
             {% endfor %}
         </select>
 
         <select id="locomotive" name="locomotive">
+            <option selected value="0">----------------</option>
             {% for i in locomotives %}
                 <option value="{{ i.id }}">{{ i }}</option>
+
             {% endfor %}
         </select>
         <select id="period" name="period" class="select">
@@ -31,57 +36,93 @@
     <script>
         var totalCost = 0;
     </script>
-    {{ chart_period }} vasya
     {% for i in locomotives %}
-        {% for j in periods %}
-{#            {{ j.year }}sdfsgsdg{{ chart_period }}#}
-            {% if j.year == chart_period %}
-                {% if j.locomotive_id == i.id %}
-                    <p>{{ i.name }}; rate={{ i.rate }}; run={{ j.run }}; </p>
-                    <script>
-                        var cost = (+{{ i.rate }} * +{{ j.run }})
-                        totalCost += cost
-                        document.write("<p>" + "cost= " + cost + "</p>")
-                        document.write("<p>" + "total =  " + totalCost + "</p>")
-                        {#document.write("<p>" + "aaaaa =  " + {{ j.year }} + "</p>")#}
-                    </script>
+{#        {% if i.id == train %}#}
+            {% for j in periods %}
+                {% if i.id == train %}
+{#                если все данные есть#}
+                    {% if j.year == chart_period and j.locomotive_id == i.id and j.branch_id == filial %}
+                        <script>
+                            var barChartData = {
+                                labels : [{{ chart_period }}],
+                                datasets : [
+                                    {
+                                        fillColor : "rgba(220,220,220,0.5)",
+                                        strokeColor : "rgba(220,220,220,0.8)",
+                                        highlightFill: "rgba(220,220,220,0.75)",
+                                        highlightStroke: "rgba(220,220,220,1)",
+                                        data : [{{ i.rate |mul:j.run }}]
+                                    },
+                                ]
+                            }
+                            window.onload = function(){
+                                var ctx = document.getElementById("canvas").getContext("2d");
+                                window.myBar = new Chart(ctx).Bar(barChartData, {
+                                    responsive : true
+                                });
+                            }
+                        </script>
+    {#               по одному локомотиву во всех филиалах за год#}
+                    {% elif j.year == chart_period and filial == 0 and j.locomotive_id == i.id%}
+                        <script>
+                            var cost = (+{{ i.rate }} * +{{ j.run }})
+                            totalCost += cost
+                            var barChartData = {
+                                labels : [{{ chart_period }}],
+                                datasets : [
+                                    {
+                                        fillColor : "rgba(220,220,220,0.5)",
+                                        strokeColor : "rgba(220,220,220,0.8)",
+                                        highlightFill: "rgba(220,220,220,0.75)",
+                                        highlightStroke: "rgba(220,220,220,1)",
+                                        data : [totalCost]
+                                    },
+                                ]
+                            }
+                            window.onload = function(){
+                                var ctx = document.getElementById("canvas").getContext("2d");
+                                window.myBar = new Chart(ctx).Bar(barChartData, {
+                                    responsive : true
+                                });
+                            }
+                        </script>
+                    {% endif %}
+
+{#               по филиалу за все поезда за год     #}
+                {% elif  train == 0 and filial != 0%}
+{#                   здесь надо собрать рейты умноженные на путь, но из-за цикла, данные увеличиваются в разы#}
+{#                   а так же надо собрать за каждый год отдельно#}
+{#                    <script>#}
+{#                        var cost = (+{{ i.rate }} * +{{ j.run }})#}
+{#                        totalCost += cost#}
+{#                        var barChartData = {#}
+{#                            labels : [{{ chart_period }}],#}
+{#                            datasets : [#}
+{#                                {#}
+{#                                    fillColor : "rgba(220,220,220,0.5)",#}
+{#                                    strokeColor : "rgba(220,220,220,0.8)",#}
+{#                                    highlightFill: "rgba(220,220,220,0.75)",#}
+{#                                    highlightStroke: "rgba(220,220,220,1)",#}
+{#                                    data : [totalCost]#}
+{#                                },#}
+{#                            ]#}
+{#                        }#}
+{#                        window.onload = function(){#}
+{#                            var ctx = document.getElementById("canvas").getContext("2d");#}
+{#                            window.myBar = new Chart(ctx).Bar(barChartData, {#}
+{#                                responsive : true#}
+{#                            });#}
+{#                        }#}
+{#                    </script>#}
                 {% endif %}
-            {% else %}
-            {% endif %}
-        {% endfor %}
-        <script>
-    var barChartData = {
-		labels : [{{ chart_period }}],
-		datasets : [
-			{
-				fillColor : "rgba(220,220,220,0.5)",
-				strokeColor : "rgba(220,220,220,0.8)",
-				highlightFill: "rgba(220,220,220,0.75)",
-				highlightStroke: "rgba(220,220,220,1)",
-				data : [totalCost]
-			},
-			{#{#}
-			{#	fillColor : "rgba(151,187,205,0.5)",#}
-			{#	strokeColor : "rgba(151,187,205,0.8)",#}
-			{#	highlightFill : "rgba(151,187,205,0.75)",#}
-			{#	highlightStroke : "rgba(151,187,205,1)",#}
-			{#	data : [randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor()]#}
-			{# } #}
-		]
 
-	}
-	window.onload = function(){
-		var ctx = document.getElementById("canvas").getContext("2d");
-		window.myBar = new Chart(ctx).Bar(barChartData, {
-			responsive : true
-		});
-	}
-
-	</script>
+            {% endfor %}
     {% endfor %}
 
-    total cost= one symbol
 <canvas id="canvas" height="450" width="600"></canvas>
+
+
+
 
 {% endblock %}
 
