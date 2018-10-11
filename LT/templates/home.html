@@ -25,22 +25,23 @@
             {% endfor %}
         </select>
         <select id="period" name="period" class="select">
+            <option selected value="0">----------------</option>
             {% for i in periods %}
                 <option value="{{ i }}">{{ i }}</option>
             {% endfor %}
         </select>
-
-{#        Филиал: {{ form.filial }}    Серия: {{ form.locomotive }}    Год: {{ form.period }}#}
         <input type="submit">
     </form>
     <script>
-        var totalCost = 0;
+        var totalCost = 0,
+            obj = {},
+            arr = [];
     </script>
-    {% for i in locomotives %}
-{#        {% if i.id == train %}#}
+    {% if train > 0  %}
+        {% for i in locomotives %}
             {% for j in periods %}
                 {% if i.id == train %}
-{#                если все данные есть#}
+                    {# если все данные есть 111  + #}
                     {% if j.year == chart_period and j.locomotive_id == i.id and j.branch_id == filial %}
                         <script>
                             var barChartData = {
@@ -62,11 +63,11 @@
                                 });
                             }
                         </script>
-    {#               по одному локомотиву во всех филиалах за год#}
-                    {% elif j.year == chart_period and filial == 0 and j.locomotive_id == i.id%}
+                    {# по одному локомотиву во всех филиалах за год  011 + #}
+                    {% elif j.year == chart_period and filial == 0 and j.locomotive_id == i.id %}
                         <script>
-                            var cost = (+{{ i.rate }} * +{{ j.run }})
-                            totalCost += cost
+                            totalCost += {{ i.rate }} * {{ j.run }}
+                            console.log(totalCost)
                             var barChartData = {
                                 labels : [{{ chart_period }}],
                                 datasets : [
@@ -86,38 +87,242 @@
                                 });
                             }
                         </script>
+                    {# за все года в филиале по поезду   110 + #}
+                    {% elif j.branch_id == filial and chart_period == 0 and j.locomotive_id == i.id %}
+                         <script>
+                            if (obj.hasOwnProperty({{ j.year }})) {
+                                obj[{{ j.year }}] += {{ i.rate |mul:j.run }}
+                            }
+                            else {
+                                obj[{{ j.year }}] = {{ i.rate |mul:j.run }}
+                            }
+                            console.log(obj)
+                            var value = [];
+                            var year = []
+                            for (var key in obj) {
+                                year.push(key);
+                                value.push(obj[key]);
+                            }
+                            var barChartData = {
+                                labels : year,
+                                datasets : [
+                                    {
+                                        fillColor : "rgba(220,220,220,0.5)",
+                                        strokeColor : "rgba(220,220,220,0.8)",
+                                        highlightFill: "rgba(220,220,220,0.75)",
+                                        highlightStroke: "rgba(220,220,220,1)",
+                                        data : value
+                                    },
+                                ]
+                             }
+                            window.onload = function(){
+                                var ctx = document.getElementById("canvas").getContext("2d");
+                                window.myBar = new Chart(ctx).Bar(barChartData, {
+                                    responsive : true
+                                });
+                            }
+                        </script>
+                    {# за все года по поезду   010  + #}
+                    {% elif filial == 0 and chart_period == 0 and j.locomotive_id == i.id %}
+                       <script>
+                            if (obj.hasOwnProperty({{ j.year }})) {
+                                obj[{{ j.year }}] += {{ i.rate |mul:j.run }}
+                            }
+                            else {
+                                obj[{{ j.year }}] = {{ i.rate |mul:j.run }}
+                            }
+                            console.log(obj)
+                            var value = [];
+                            var year = []
+                            for (var key in obj) {
+                                year.push(key);
+                                value.push(obj[key]);
+                            }
+                            var barChartData = {
+                                labels : year,
+                                datasets : [
+                                    {
+                                        fillColor : "rgba(220,220,220,0.5)",
+                                        strokeColor : "rgba(220,220,220,0.8)",
+                                        highlightFill: "rgba(220,220,220,0.75)",
+                                        highlightStroke: "rgba(220,220,220,1)",
+                                        data : value
+                                    },
+                                ]
+                             }
+                            window.onload = function(){
+                                var ctx = document.getElementById("canvas").getContext("2d");
+                                window.myBar = new Chart(ctx).Bar(barChartData, {
+                                    responsive : true
+                                });
+                            }
+                        </script>
                     {% endif %}
-
-{#               по филиалу за все поезда за год     #}
-                {% elif  train == 0 and filial != 0%}
-{#                   здесь надо собрать рейты умноженные на путь, но из-за цикла, данные увеличиваются в разы#}
-{#                   а так же надо собрать за каждый год отдельно#}
-{#                    <script>#}
-{#                        var cost = (+{{ i.rate }} * +{{ j.run }})#}
-{#                        totalCost += cost#}
-{#                        var barChartData = {#}
-{#                            labels : [{{ chart_period }}],#}
-{#                            datasets : [#}
-{#                                {#}
-{#                                    fillColor : "rgba(220,220,220,0.5)",#}
-{#                                    strokeColor : "rgba(220,220,220,0.8)",#}
-{#                                    highlightFill: "rgba(220,220,220,0.75)",#}
-{#                                    highlightStroke: "rgba(220,220,220,1)",#}
-{#                                    data : [totalCost]#}
-{#                                },#}
-{#                            ]#}
-{#                        }#}
-{#                        window.onload = function(){#}
-{#                            var ctx = document.getElementById("canvas").getContext("2d");#}
-{#                            window.myBar = new Chart(ctx).Bar(barChartData, {#}
-{#                                responsive : true#}
-{#                            });#}
-{#                        }#}
-{#                    </script>#}
                 {% endif %}
-
             {% endfor %}
-    {% endfor %}
+        {% endfor %}
+
+    {% elif  train == 0 %}
+        {#  по филиалу за все поезда за год   101 + #}
+        {% if filial > 0 and chart_period > 0 %}
+            {% for j in periods %}
+                {% if j.year == chart_period %}
+                    {% for i in locomotives %}
+                        {% if j.locomotive_id == i.id %}
+                            <script>
+                                totalCost += {{ i.rate |mul:j.run }}
+                                var barChartData = {
+                                    labels : [{{ chart_period }}],
+                                    datasets : [
+                                        {
+                                            fillColor : "rgba(220,220,220,0.5)",
+                                            strokeColor : "rgba(220,220,220,0.8)",
+                                            highlightFill: "rgba(220,220,220,0.75)",
+                                            highlightStroke: "rgba(220,220,220,1)",
+                                            data : [totalCost]
+                                        },
+                                    ]
+                                }
+                                window.onload = function(){
+                                    var ctx = document.getElementById("canvas").getContext("2d");
+                                    window.myBar = new Chart(ctx).Bar(barChartData, {
+                                        responsive : true
+                                    });
+                                }
+                            </script>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        {#  по всем годам 000 + #}
+        {% elif filial == 0 and chart_period == 0 %}
+            {% for j in periods %}
+                {% for i in locomotives %}
+                    {% if j.locomotive_id == i.id %}
+                        <script>
+                            if (obj.hasOwnProperty({{ j.year }})) {
+                                obj[{{ j.year }}] += {{ i.rate |mul:j.run }}
+                            }
+                            else {
+                                obj[{{ j.year }}] = {{ i.rate |mul:j.run }}
+                            }
+                            console.log(obj)
+                            var value = [];
+                            var year = []
+                            for (var key in obj) {
+                                year.push(key);
+                                value.push(obj[key]);
+                            }
+                            var barChartData = {
+                                labels : year,
+                                datasets : [
+                                    {
+                                        fillColor : "rgba(220,220,220,0.5)",
+                                        strokeColor : "rgba(220,220,220,0.8)",
+                                        highlightFill: "rgba(220,220,220,0.75)",
+                                        highlightStroke: "rgba(220,220,220,1)",
+                                        data : value
+                                    },
+                                ]
+                             }
+                            window.onload = function(){
+                                var ctx = document.getElementById("canvas").getContext("2d");
+                                window.myBar = new Chart(ctx).Bar(barChartData, {
+                                    responsive : true
+                                });
+                            }
+                        </script>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        {#  за один год    001 + #}
+        {% elif filial == 0 and chart_period > 0 %}
+            {% for j in periods %}
+                {% if j.year == chart_period %}
+                    {% for i in locomotives %}
+                        {% if j.locomotive_id == i.id %}
+                            <script>
+                                if (obj.hasOwnProperty({{ j.year }})) {
+                                    obj[{{ j.year }}] += {{ i.rate |mul:j.run }}
+                                }
+                                else {
+                                    obj[{{ j.year }}] = {{ i.rate |mul:j.run }}
+                                }
+                                console.log(obj)
+                                var value = [];
+                                var year = []
+                                for (var key in obj) {
+                                    year.push(key);
+                                    value.push(obj[key]);
+                                }
+                                var barChartData = {
+                                    labels : year,
+                                    datasets : [
+                                        {
+                                            fillColor : "rgba(220,220,220,0.5)",
+                                            strokeColor : "rgba(220,220,220,0.8)",
+                                            highlightFill: "rgba(220,220,220,0.75)",
+                                            highlightStroke: "rgba(220,220,220,1)",
+                                            data : value
+                                        },
+                                    ]
+                                 }
+                                window.onload = function(){
+                                    var ctx = document.getElementById("canvas").getContext("2d");
+                                    window.myBar = new Chart(ctx).Bar(barChartData, {
+                                        responsive : true
+                                    });
+                                }
+                            </script>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        {# за один филиал по всем поездам за все года   100 + #}
+        {% elif filial > 0 and chart_period == 0 %}
+            {% for j in periods %}
+                {% if j.branch_id == filial %}
+                    {% for i in locomotives %}
+                        {% if j.locomotive_id == i.id %}
+                            <script>
+                            if (obj.hasOwnProperty({{ j.year }})) {
+                                obj[{{ j.year }}] += {{ i.rate |mul:j.run }}
+                            }
+                            else {
+                                obj[{{ j.year }}] = {{ i.rate |mul:j.run }}
+                            }
+                            console.log(obj)
+                            var value = [];
+                            var year = []
+                            for (var key in obj) {
+                                year.push(key);
+                                value.push(obj[key]);
+                            }
+                            var barChartData = {
+                                labels : year,
+                                datasets : [
+                                    {
+                                        fillColor : "rgba(220,220,220,0.5)",
+                                        strokeColor : "rgba(220,220,220,0.8)",
+                                        highlightFill: "rgba(220,220,220,0.75)",
+                                        highlightStroke: "rgba(220,220,220,1)",
+                                        data : value
+                                    },
+                                ]
+                             }
+                            window.onload = function(){
+                                var ctx = document.getElementById("canvas").getContext("2d");
+                                window.myBar = new Chart(ctx).Bar(barChartData, {
+                                    responsive : true
+                                });
+                            }
+                        </script>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endif %}
 
 <canvas id="canvas" height="450" width="600"></canvas>
 

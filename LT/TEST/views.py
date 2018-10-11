@@ -24,10 +24,10 @@ def home(request):
     else:
         filial = 0
         locomotive = 0
-        years = [i for i in range(2017, 2022)]
-        year = ""
-        for i in years:
-            year = year + str(i) + "," + " "
+        # years = [i for i in range(2017, 2022)]
+        year = 0
+        # for i in years:
+        #     year = year + str(i) + "," + " "
         print(year, filial, locomotive,  'periodssss', type(year))
 
     content = {
