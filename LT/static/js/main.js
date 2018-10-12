@@ -1,5 +1,4 @@
 $("#submit").click(function () {
-    console.log($(this).val())
 //  отправляем ajax запрос на сервер
   $.ajax({
       type: "GET",
