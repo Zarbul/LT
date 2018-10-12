@@ -5,7 +5,7 @@ $("#submit").click(function () {
 //  отправляем ajax запрос на сервер
     $.ajax({
         type: "GET",
-        url: '/index/',
+        url: '/chart/',
         data: {
             'filial': filial,
             'locomotive': locomotive,

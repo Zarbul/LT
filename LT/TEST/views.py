@@ -22,41 +22,42 @@ def chart(request):
         for i in list_locomotive:
             for j in list_period:
                 if i.id == locomotive:
-                    # all data
+                    # 111 all data
                     if j.year == period and j.locomotive_id == i.id and j.branch_id == filial:
                         if j.year in obj:
                             obj[j.year] += i.rate * j.run
                         else:
                             obj[j.year] = i.rate * j.run
-                    # one train one year all filials
+                    # 011 one train one year all filials
                     elif j.year == period and filial == 0 and j.locomotive_id == i.id:
                         if j.year in obj:
                             obj[j.year] += i.rate * j.run
                         else:
                             obj[j.year] = i.rate * j.run
-                    # all year one train one filial
+                    # 110 all year one train one filial
                     elif j.branch_id == filial and period == 0 and j.locomotive_id == i.id:
                         if j.year in obj:
                             obj[j.year] += i.rate * j.run
                         else:
                             obj[j.year] = i.rate * j.run
-                    # all years all filials one train
+                    # 010 all years all filials one train
                     elif filial == 0 and period == 0 and j.locomotive_id == i.id:
                         if j.year in obj:
                             obj[j.year] += i.rate * j.run
                         else:
                             obj[j.year] = i.rate * j.run
     elif locomotive == 0:
-        # one filial one year all train
+        # 101 one filial one year all train
         if filial > 0 and period > 0:
             for j in list_period:
-                for i in list_locomotive:
-                    if j.locomotive_id == i.id:
-                        if j.year in obj:
-                            obj[j.year] += i.rate * j.run
-                        else:
-                            obj[j.year] = i.rate * j.run
-        # all years
+                if j.year == period:
+                    for i in list_locomotive:
+                        if j.locomotive_id == i.id:
+                            if j.year in obj:
+                                obj[j.year] += i.rate * j.run
+                            else:
+                                obj[j.year] = i.rate * j.run
+        # 000 all years all filials all train
         elif filial == 0 and period == 0:
             for j in list_period:
                 for i in list_locomotive:
@@ -66,7 +67,7 @@ def chart(request):
                         else:
                             obj[j.year] = i.rate * j.run
 
-        # only one year
+        # 001 only one year
         elif filial == 0 and period > 0:
             for j in list_period:
                 if j.year == period:
@@ -76,7 +77,7 @@ def chart(request):
                                 obj[j.year] += i.rate * j.run
                             else:
                                 obj[j.year] = i.rate * j.run
-        # one filial all year all train
+        # 100 one filial all year all train
         elif filial > 0 and period == 0:
             for j in list_period:
                 if j.branch_id == filial:
