@@ -242,28 +242,16 @@
                     {% for i in locomotives %}
                         {% if j.locomotive_id == i.id %}
                             <script>
-                                if (obj.hasOwnProperty({{ j.year }})) {
-                                    obj[{{ j.year }}] += {{ i.rate |mul:j.run }}
-                                }
-                                else {
-                                    obj[{{ j.year }}] = {{ i.rate |mul:j.run }}
-                                }
-                                console.log(obj)
-                                var value = [];
-                                var year = []
-                                for (var key in obj) {
-                                    year.push(key);
-                                    value.push(obj[key]);
-                                }
+                                totalCost += {{ i.rate }} * {{ j.run }}
                                 var barChartData = {
-                                    labels : year,
+                                    labels : [{{ chart_period }}],
                                     datasets : [
                                         {
                                             fillColor : "rgba(220,220,220,0.5)",
                                             strokeColor : "rgba(220,220,220,0.8)",
                                             highlightFill: "rgba(220,220,220,0.75)",
                                             highlightStroke: "rgba(220,220,220,1)",
-                                            data : value
+                                            data : [totalCost]
                                         },
                                     ]
                                  }

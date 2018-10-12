@@ -1,0 +1,97 @@
+{% extends 'adminlte/base.html' %}
+
+{% load mathfilters %}
+
+{% load static %}
+
+{% block title %}My App{% endblock %}
+
+{% block content %}
+
+     <form>
+
+        <select id="filial" name="filial">
+            <option selected value="0">Выберите филиал</option>
+            {% for i in branches %}
+                <option value="{{ i.id }}">{{ i }}</option>
+            {% endfor %}
+        </select>
+
+        <select id="locomotive" name="locomotive">
+            <option selected value="0">Выберите локомотив</option>
+            {% for i in locomotives %}
+                <option value="{{ i.id }}">{{ i }}</option>
+
+            {% endfor %}
+        </select>
+        <select id="period" name="period" class="select">
+            <option selected value="0">Выберите год</option>
+            {% for i in periods %}
+                <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select>
+        <input id="submit" type="submit">
+    </form>
+    <p>График будет отображаться после выбора параметров</p>
+    <script>
+        if ( {{ labels }} > 0 ){
+            var barChartData = {
+                labels : [{{ labels }}],
+                datasets : [
+                    {
+                        fillColor : "rgba(220,220,220,0.5)",
+                        strokeColor : "rgba(220,220,220,0.8)",
+                        highlightFill: "rgba(220,220,220,0.75)",
+                        highlightStroke: "rgba(220,220,220,1)",
+                        data : [{{ data }}]
+                    },
+                ]
+            };
+            window.onload = function(){
+                var ctx = document.getElementById("canvas").getContext("2d");
+                window.myBar = new Chart(ctx).Bar(barChartData, {
+                  responsive : true
+                });
+            };
+        } else if ({{ labels }} == 0){
+            var value = [];
+            var year = [];
+            for (var key in {{ obj }}) {
+              year.push(key);
+              value.push({{ obj }}[key]);
+            }
+            var barChartData = {
+              labels: year,
+              datasets: [
+                  {
+                      fillColor: "rgba(220,220,220,0.5)",
+                      strokeColor: "rgba(220,220,220,0.8)",
+                      highlightFill: "rgba(220,220,220,0.75)",
+                      highlightStroke: "rgba(220,220,220,1)",
+                      data: value
+                  },
+              ]
+            }
+            window.onload = function () {
+              var ctx = document.getElementById("canvas").getContext("2d");
+              window.myBar = new Chart(ctx).Bar(barChartData, {
+                  responsive: true
+              });
+            }
+        }
+    </script>
+
+
+<canvas id="canvas" height="450" width="600"></canvas>
+
+
+
+
+{% endblock %}
+
+{% block javascript %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/chart.js/Chart.js' %}"></script>
+    <script src="{% static 'js/chart.js/Chart.min.js' %}"></script>
+{% endblock %}
