@@ -6,7 +6,7 @@
 
 {% block content %}
 
-     <form>
+    <form>
 
         <select id="filial" name="filial">
             <option selected value="0">Выберите филиал</option>
@@ -31,56 +31,10 @@
         <input id="submit" type="submit" value="Выбрать">
     </form>
     <p>График будет отображаться после выбора параметров</p>
-    <script>
-        if ( {{ labels }} > 0 ){
-            var barChartData = {
-                labels : [{{ labels }}],
-                datasets : [
-                    {
-                        fillColor : "rgba(220,220,220,0.5)",
-                        strokeColor : "rgba(220,220,220,0.8)",
-                        highlightFill: "rgba(220,220,220,0.75)",
-                        highlightStroke: "rgba(220,220,220,1)",
-                        data : [{{ data }}]
-                    },
-                ]
-            };
-            window.onload = function(){
-                var ctx = document.getElementById("canvas").getContext("2d");
-                window.myBar = new Chart(ctx).Bar(barChartData, {
-                  responsive : true
-                });
-            };
-        } else if ({{ labels }} == 0){
-            var value = [];
-            var year = [];
-            for (var key in {{ obj }}) {
-              year.push(key);
-              value.push({{ obj }}[key]);
-            }
-            var barChartData = {
-              labels: year,
-              datasets: [
-                  {
-                      fillColor: "rgba(220,220,220,0.5)",
-                      strokeColor: "rgba(220,220,220,0.8)",
-                      highlightFill: "rgba(220,220,220,0.75)",
-                      highlightStroke: "rgba(220,220,220,1)",
-                      data: value
-                  },
-              ]
-            }
-            window.onload = function () {
-              var ctx = document.getElementById("canvas").getContext("2d");
-              window.myBar = new Chart(ctx).Bar(barChartData, {
-                  responsive: true
-              });
-            }
-        }
-    </script>
 
 
-<canvas id="canvas" height="450" width="600"></canvas>
+
+    <canvas id="canvas" height="450" width="600"></canvas>
 
 
 
