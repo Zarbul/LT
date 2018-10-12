@@ -1,8 +1,9 @@
 $("#submit").click(function () {
+    console.log($(this).val())
 //  отправляем ajax запрос на сервер
   $.ajax({
       type: "GET",
-      url: "/",
+      url: this,
       data: {
           'filial': $("#filial").val(),
           'locomotive': $('#locomotive').val(),
@@ -12,10 +13,10 @@ $("#submit").click(function () {
       cache: false,
       success: function (data) {
           if (data == 'ok'){
-
+              console.log('OK')
           }
           else if (data == 'no') {
-
+            console.log('NO')
           }
       }
   })
